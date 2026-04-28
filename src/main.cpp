@@ -1,4 +1,5 @@
 #include "WiFi.h"  //include the WI-FI library for ESP32
+
 void setup(){
   //Initialize serial communication at 115200 baud rate
   Serial.begin(115200);
