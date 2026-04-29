@@ -1,6 +1,20 @@
 #include <WiFi.h>  //include the WI-FI library for ESP32
 #include "secrets.h"  //Include the header file with Wi-Fi credentials
 #include <Arduino.h>
+#include <WebServer.h> //Include the Webserver library
+//Create a WebServer instance on port 80
+WebServer server(80);
+//Function to handle requests to thr root path
+void handleRoot(){
+  //Define the HTML content to be displayed
+  String html="<html><head><metacharset='UTF-8'></head><body>";
+  html+="<h1>Hello AIoT!</h1>";
+  html+="<p>Current Light Status: <b>ON</b></p>";
+  html+="</body></html>";
+
+  //Send HTTP 200 response with the HTML content
+  server.send(200,"text/html",html);
+}
 void setup(){
   //Initialize serial communication at 115200 baud rate
   Serial.begin(115200);
@@ -29,8 +43,17 @@ void setup(){
   Serial.print("IP Adderess ");
   Serial.println(WiFi.localIP());
   Serial.println("----------------------------------------");
+  //Web Server Configuration
+  
+  //When a user accesses the root path,execute the handleRoot function
+  server.on("/",handleRoot);
+
+  //Start the server
+  server.begin();
+  Serial.println("HTTP Server started.");
 }
 
 void loop(){
-  //Today's task is to connect to the network on startup,so loop() can be empty for now
+  //Continuously handle incoming requests from clients(btowsers)
+  server.handleClient();
 }
