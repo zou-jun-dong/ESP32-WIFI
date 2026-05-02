@@ -1,39 +1,75 @@
-#include <WiFi.h>  //include the WI-FI library for ESP32
 #include <Arduino.h>
+#include <WiFi.h>
+#include <secrets.h>
+#include <WebServer.h>
 
-//Set the SSID and password for the ESP32 Access Point
-const char* AP_SSID="ESP32_AIoT_AP";
-const char* AP_PASS="12345678";
+const int ledPin=2;  //Define the LED pin
 
+bool isBreathing=false;   //Whether breathing mode is active 
+int brightness=0;   //Current brightness
+int fadeAmount=5;   //Fade increment amount
+
+
+WebServer server(80);
+
+//Handle root requests and display the control panel
+void handleRoot()
+{
+  String statusText= isBreathing ? "RUNNING":"STOPPED";
+   String html = "<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+  html += "<style>body{text-align:center;font-family:sans-serif;} .btn{padding:20px;font-size:20px;margin:10px;cursor:pointer;}</style>";
+  html += "</head><body>";
+  html += "<h1>ESP32 联网呼吸灯</h1>";
+  html += "<p>当前状态: <b>" + statusText + "</b></p>";
+  html += "<button class='btn' onclick=\"location.href='/on'\">开启呼吸 (ON)</button>";
+  html += "<button class='btn' onclick=\"location.href='/off'\">关闭灯光 (OFF)</button>";
+  html += "</body></html>";
+  server.send(200,"text/html",html);
+}
 
 void setup(){
-  //Initialize serial communication at 115200 baud rate
   Serial.begin(115200);
-  //Short delay to ensure the serial monitor is ready
-  delay(1000);
-  Serial.println("\n----------------------------------------");
-  Serial.println("Congiguring Access Point...");
-  //Set Wi-Fi mode to Access Point (AP),turningt the device into a hotpot
-  WiFi.mode(WIFI_AP);
-  //Start the Access Point
-  bool result=WiFi.softAP(AP_SSID,AP_PASS);
-  if (result)
+  pinMode(ledPin,OUTPUT);  //Configure the LED pin as output
+  WiFi.begin(WIFI_SSID,WIFI_PASSWORD);
+  while (!WiFi.isConnected())
   {
-    /* code */
-    Serial.println("AP Mode started successfully!");
-      //Get the IP adress of the ESP32 AP (default is usually 192.168.4.1)
-  IPAddress IP=WiFi.softAPIP();
-  Serial.print("AP Ip Address");
-  Serial.print(IP);
+    Serial.println(".");
+    delay(500);
   }
-   else
-   {
-    Serial.println("Failled to start AP Mode");
-
-   }
-   Serial.println("-------------------------------------------");
+   Serial.println("\nWi-Fi Connected. IP: " + WiFi.localIP().toString());
+   server.on("/",handleRoot);  //Route configuration
+   //Endpoint to start breathing
+   server.on("/on",[]() {
+    isBreathing =true;
+    server.sendHeader("Location","/");
+    server.send(303);
+   });
+   //Endpoint to turn off breathing
+   server.on("/off",[](){
+    isBreathing=false;
+    analogWrite(ledPin,0);
+    server.sendHeader("Location","/");
+    server.send(303);
+   });
+   server.begin();
 }
 
 void loop(){
-   //Your ESP32 is now continuously broadcasting its Wi-Fi signal
+  server.handleClient();  //Handle web requests
+  if (isBreathing)
+  {
+    //Use analogWrite for PWM bringtness control
+    analogWrite(ledPin,brightness);
+    //Change brightness for next iteration
+    brightness=brightness+fadeAmount;
+    //Reverse fading direction at boundaries
+    if (brightness<=0||brightness>=255)
+    {
+      fadeAmount=-fadeAmount;
+    }
+    
+  }
+  delay(30); //Control breathing speed
+  
+
 }
