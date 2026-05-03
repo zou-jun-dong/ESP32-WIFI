@@ -1,0 +1,48 @@
+# ESP32-S3 Network & AIoT Fundamentals
+
+## 📌 Project Overview / 项目概述
+This repository documents the foundational network programming tasks for the ESP32-S3. The primary goal is to master essential Wi-Fi capabilities, transforming the microcontroller into a connected node capable of hosting web servers and interacting with the internet.
+
+## 🛠 Hardware Setup / 硬件配置
+* **MCU:** ESP32-S3
+* **Physical Layout：** The ESP32-S3 board is mounted across the upper section of two joined breadboards, spanning exactly 9 rows to ensure stable connections and ample space for wiring.
+* **Components:** Built-in LED
+
+## 📅 Weekly Progress
+
+### Week 1, Day 1: Wi-Fi Scanner
+* **Objective:** Understand Wi-Fi environments and electromagnetic signal properties.
+* **Action:** Developed a scanner using the `WiFi.h` library to detect surrounding Wi-Fi hotspots.
+* **Achievement:** Successfully outputted SSIDs and their respective RSSI (Received Signal Strength Indicator) values to the serial monitor. Observed real-time signal degradation by manipulating the physical distance and line-of-sight to the router.
+
+### Week 1, Day 2: Station Mode
+* **Objective:** Connect the ESP32 to the Internet as a client.
+* **Action:** Configured the ESP32 to operate in Station (STA) mode and connected it to a local network using credentials securely stored in an external `secrets.h` file.
+* **Achievement:** Successfully authenticated with the router and obtained a dynamic Local IP address via DHCP, logging it to the serial monitor for future network requests.
+
+### Week 1, Day 3: Simple Web Server
+* **Objective:** Learn how to serve content from the ESP32 to a web browser.
+* **Action:** Utilized the `WebServer` library to set up a listener on port 80. Defined a handler function to send HTML code back to the client upon request.
+* **Achievement:** Created a basic webpage interface. When navigating to the ESP32's local IP, the browser successfully renders device status. This established a foundation for future data dashboards.
+
+### Week 1, Day 4: Access Point Mode 
+* **Objective:** Turn the ESP32 into an independent Wi-Fi hotspot, a critical skill for device provisioning.
+* **Action:** Switched the `WiFi.mode` to `WIFI_AP` and initialized a soft Access Point using `WiFi.softAP()`.
+* **Achievement:** Defined a custom SSID and password. Connected a smartphone directly to the ESP32's broadcasted network, verifying its standalone peer-to-peer connectivity.
+
+### Week 1, Day 5: Network Time Protocol
+* **Objective:** Automatically synchronize device time via the internet for accurate data logging.
+* **Action:** Utilized the `time.h` library and `configTime()` function to fetch Beijing Time (UTC+8) from Aliyun and standard pool NTP servers.
+* **Achievement:** Successfully retrieved and continuously printed real-time network time. This establishes a reliable timestamping foundation for future time-based automation tasks.
+
+### 🚀 Bonus Project: Connected Breathing Light
+* **Objective:** Create a hardware interaction interface accessible via a web browser.
+* **Action:** Combined `analogWrite()` for PWM (Pulse Width Modulation) with the `WebServer` routing (`/on`, `/off`).
+* **Achievement:** Realized a "Closed Loop" IoT application where a software command from a remote smartphone triggers a physical, analog-like behavior (breathing LED effect) on the hardware.
+
+---
+
+## ⚠️ Security Notice
+The `secrets.h` file, which contains sensitive Wi-Fi credentials (SSID and Password), is strictly excluded from this repository via `.gitignore`. 
+**Do not commit your personal Wi-Fi passwords to public repositories.**
+
